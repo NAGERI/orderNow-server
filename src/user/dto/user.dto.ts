@@ -1,8 +1,8 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-enum ROLES {
-  USER = 'USER',
+export enum UserRole {
   ADMIN = 'ADMIN',
+  USER = 'USER',
 }
 
 export class ResponseUserDto {
@@ -15,8 +15,8 @@ export class ResponseUserDto {
   @IsNotEmpty()
   password: string;
 
-  @IsEnum(ROLES, { message: 'Must have USER or ADMIN roles.' })
-  role: ROLES;
+  @IsEnum(UserRole, { message: 'Must have USER or ADMIN roles.' })
+  role: UserRole;
 }
 
 export class CreateUserDto {
@@ -26,4 +26,14 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+  role: UserRole;
+}
+
+export class UpdateUserDto {
+  @IsString()
+  username?: string;
+  @IsString()
+  password?: string;
+  @IsEnum(UserRole, { message: 'Must have USER or ADMIN roles.' })
+  role?: UserRole;
 }
