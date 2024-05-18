@@ -26,7 +26,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A Multi-tenant applicaiton for restaurants.
 
 ## Installation
 
@@ -59,10 +59,6 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
-
-## Description
-
-A Multi-tenant applicaiton for restaurants.
 
 ## License
 

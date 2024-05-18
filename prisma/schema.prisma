@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  password String
+  role     UserRole @default(USER)
+  orders   Order[]
+  stores   Store[]
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model Store {
+  id          Int         @id @default(autoincrement())
+  adminId     Int
+  name        String      @unique
+  description String?
+  status      StoreStatus @default(ACTIVE)
+  admin       User        @relation(fields: [adminId], references: [id])
+  items       Item[]
+  orders      Order[]
+}
+
+enum StoreStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Item {
+  id          Int     @id @default(autoincrement())
+  storeId     Int
+  name        String  @unique
+  price       Float
+  description String?
+  store       Store   @relation(fields: [storeId], references: [id])
+  order       Order[]
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  storeId     Int
+  itemId      Int
+  quantity    Int
+  totalAmount Int
+  status      OrderStatus @default(Pending)
+  createdAt   DateTime    @default(now())
+  user        User        @relation(fields: [userId], references: [id])
+  store       Store       @relation(fields: [storeId], references: [id])
+  item        Item        @relation(fields: [itemId], references: [id])
+}
+
+enum OrderStatus {
+  Pending
+  Completed
+  Cancelled
+}
