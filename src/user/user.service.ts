@@ -49,6 +49,17 @@ export class UserService {
 
     return res;
   }
+
+  async getAllUsers(): Promise<any> {
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        role: true,
+      },
+    });
+  }
+
   async createUser(data: CreateUserDto) {
     try {
       const hashedPassword = await bcrypt.hash(data.password, 10);

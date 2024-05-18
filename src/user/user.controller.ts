@@ -12,12 +12,12 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto/user.dto';
+import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 
-@Controller('/user')
-@UseGuards(AuthGuard())
+@Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
   private logger = new Logger('UserService');
@@ -35,8 +35,8 @@ export class UserController {
   }
 
   @Get()
-  getUsers(): Promise<ResponseUserDto[]> {
-    return this.userService.getUsers();
+  getAllUsers(): Promise<ResponseUserDto[]> {
+    return this.userService.getAllUsers();
   }
 
   @Post()

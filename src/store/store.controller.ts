@@ -10,11 +10,11 @@ import {
   Request,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
-import { AuthGuard } from '@nestjs/passport';
 import { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
+import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 
 @Controller('stores')
-@UseGuards(AuthGuard())
+@UseGuards(JwtAuthGuard)
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 

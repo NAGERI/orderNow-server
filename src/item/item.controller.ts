@@ -9,12 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ItemService } from './item.service';
-
+import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 import { CreateItemDto, UpdateItemDto } from './dto/item.dto';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('items')
-@UseGuards(AuthGuard())
+@UseGuards(JwtAuthGuard)
 export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 

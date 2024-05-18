@@ -2,25 +2,25 @@ import {
   Body,
   ConflictException,
   Controller,
-  Get,
   HttpStatus,
   Post,
-  Req,
   Res,
   UnauthorizedException,
-  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthCredentialsDto } from './dto/authCredentials.dto';
+import {
+  AuthCredentialsDto,
+  AuthSignInCredentialsDto,
+} from './dto/authCredentials.dto';
 import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/signup')
+  @Post('signup')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async signUp(
     @Body() authCredentialsDto: AuthCredentialsDto,
@@ -37,13 +37,13 @@ export class AuthController {
     return res.status(HttpStatus.CREATED).json(result);
   }
 
-  @Post('/signin')
+  @Post('signin')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async signin(
-    @Body() authCredentialsDto: AuthCredentialsDto,
+    @Body() authSignInCredentialsDto: AuthSignInCredentialsDto,
     @Res() res: Response,
   ) {
-    const { username, password } = authCredentialsDto;
+    const { username, password } = authSignInCredentialsDto;
     const result = await this.authService.signInUser({
       username,
       password,
