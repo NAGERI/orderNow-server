@@ -25,12 +25,12 @@ export class ItemController {
   }
 
   @Post()
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async createItem(@Body() createItemDto: CreateItemDto) {
     return this.itemService.createItem(createItemDto);
   }
 
   @Put(':id')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async updateItem(
     @Param('id') id: string,
     @Body() updateItemDto: UpdateItemDto,

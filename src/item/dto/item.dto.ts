@@ -1,5 +1,15 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
+export enum ITEMSTATUS {
+  InSTOCK = 'InSTOCK',
+  OutOfSTOCK = 'OutOfSTOCK',
+}
 // item.dto.ts
 export class CreateItemDto {
   @IsString()
@@ -11,6 +21,8 @@ export class CreateItemDto {
   price: number;
 
   @IsString()
+  @IsNotEmpty()
+  @IsOptional()
   description?: string;
 
   @IsNumber()
@@ -21,12 +33,23 @@ export class CreateItemDto {
 export class UpdateItemDto {
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   name: string;
 
   @IsNumber()
   @IsNotEmpty()
+  @IsOptional()
   price: number;
 
   @IsString()
+  @IsNotEmpty()
+  @IsOptional()
   description?: string;
+
+  @IsEnum(ITEMSTATUS, {
+    message: 'Must have InSTOCK or OutOfSTOCK status.',
+  })
+  @IsNotEmpty()
+  @IsOptional()
+  status: ITEMSTATUS;
 }

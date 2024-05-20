@@ -7,12 +7,15 @@ CREATE TYPE "StoreStatus" AS ENUM ('ACTIVE', 'INACTIVE');
 -- CreateEnum
 CREATE TYPE "OrderStatus" AS ENUM ('Pending', 'Completed', 'Cancelled');
 
+-- CreateEnum
+CREATE TYPE "ItemStatus" AS ENUM ('InSTOCK', 'OutOfSTOCK');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" "UserRole" NOT NULL,
+    "role" "UserRole" NOT NULL DEFAULT 'USER',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -20,7 +23,7 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Store" (
     "id" SERIAL NOT NULL,
-    "adminId" INTEGER NOT NULL,
+    "adminId" INTEGER,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "status" "StoreStatus" NOT NULL DEFAULT 'ACTIVE',
@@ -35,6 +38,7 @@ CREATE TABLE "Item" (
     "name" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "description" TEXT,
+    "itemStatus" "ItemStatus" NOT NULL DEFAULT 'InSTOCK',
 
     CONSTRAINT "Item_pkey" PRIMARY KEY ("id")
 );
@@ -53,8 +57,20 @@ CREATE TABLE "Order" (
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateIndex
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Store_name_key" ON "Store"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Item_id_key" ON "Item"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Item_name_key" ON "Item"("name");
+
 -- AddForeignKey
-ALTER TABLE "Store" ADD CONSTRAINT "Store_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Store" ADD CONSTRAINT "Store_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Item" ADD CONSTRAINT "Item_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

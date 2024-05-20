@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -31,9 +37,15 @@ export class CreateUserDto {
 
 export class UpdateUserDto {
   @IsString()
+  @IsNotEmpty()
+  @IsOptional()
   username?: string;
   @IsString()
+  @IsNotEmpty()
+  @IsOptional()
   password?: string;
   @IsEnum(UserRole, { message: 'Must have USER or ADMIN roles.' })
+  @IsNotEmpty()
+  @IsOptional()
   role?: UserRole;
 }

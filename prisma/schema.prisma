@@ -29,11 +29,11 @@ enum UserRole {
 
 model Store {
   id          Int         @id @default(autoincrement())
-  adminId     Int
+  adminId     Int?
   name        String      @unique
   description String?
   status      StoreStatus @default(ACTIVE)
-  admin       User        @relation(fields: [adminId], references: [id])
+  admin       User?       @relation(fields: [adminId], references: [id])
   items       Item[]
   orders      Order[]
 }
@@ -43,13 +43,15 @@ enum StoreStatus {
   INACTIVE
 }
 
+// TODO add item status, InSTOCK OutOfSTOCK, add Currency enum UGX, USD 
 model Item {
-  id          Int     @id @default(autoincrement())
+  id          Int        @id @unique @default(autoincrement())
   storeId     Int
-  name        String  @unique
+  name        String     @unique
   price       Float
   description String?
-  store       Store   @relation(fields: [storeId], references: [id])
+  itemStatus  ItemStatus @default(InSTOCK)
+  store       Store      @relation(fields: [storeId], references: [id])
   order       Order[]
 }
 
@@ -71,4 +73,9 @@ enum OrderStatus {
   Pending
   Completed
   Cancelled
+}
+
+enum ItemStatus {
+  InSTOCK
+  OutOfSTOCK
 }

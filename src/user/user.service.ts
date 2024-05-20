@@ -15,6 +15,7 @@ export class UserService {
         where: { id },
       });
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(
         'Failed to delete user',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -29,6 +30,7 @@ export class UserService {
         data,
       });
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(
         'Failed to update user',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -51,13 +53,21 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<any> {
-    return await this.prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        role: true,
-      },
-    });
+    try {
+      return await this.prisma.user.findMany({
+        select: {
+          id: true,
+          username: true,
+          role: true,
+        },
+      });
+    } catch (error) {
+       this.logger.error(error);
+      throw new HttpException(
+        'Failed to Get users',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async createUser(data: CreateUserDto) {
@@ -70,6 +80,7 @@ export class UserService {
         },
       });
     } catch (error) {
+       this.logger.error(error);
       throw new HttpException(
         'Failed to create user',
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export enum ORDERSTATUS {
   Pending = 'Pending',
@@ -9,16 +9,21 @@ export enum ORDERSTATUS {
 export class CreateOrderDto {
   @IsNumber()
   @IsNotEmpty()
+  @IsOptional()
   itemId: number;
+
   @IsNumber()
   @IsNotEmpty()
   storeId: number;
+
   @IsNumber()
   @IsNotEmpty()
   quantity: number;
+
   @IsNumber()
   @IsNotEmpty()
-  totalAmount: number;
+  @IsOptional()
+  totalAmount?: number;
 }
 
 export class UpdateOrderDto {

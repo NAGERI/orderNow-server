@@ -8,8 +8,6 @@ import {
   Param,
   UseGuards,
   Request,
-  ValidationPipe,
-  UsePipes,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
@@ -26,7 +24,6 @@ export class StoreController {
   }
 
   @Post()
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async createStore(@Body() createStoreDto: CreateStoreDto, @Request() req) {
     return this.storeService.createStore({
       adminId: req.user.id,

@@ -1,11 +1,12 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
+import { Order, Prisma } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
   constructor(private readonly prisma: PrismaService) {}
-
+  logger = new Logger('Order Service');
   async getOrders(userId: number) {
     try {
       return await this.prisma.order.findMany({
@@ -13,6 +14,7 @@ export class OrderService {
         include: { item: true, store: true },
       });
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(
         'Failed to fetch orders',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -20,12 +22,31 @@ export class OrderService {
     }
   }
 
-  async createOrder(data: any) {
+  async getItemPrice(id: Number): Promise<number> {
+    const item = await this.prisma.item.findUnique({
+      where: { id: Number(id) },
+      select: { price: true },
+    });
+    this.logger.log(item);
+    if (!item) {
+      throw new Error(`Item with id ${id} not found`);
+    }
+
+    return item.price;
+  }
+  // TODO the connect is not necessary. DEBUG
+  async createOrder(data: any): Promise<Order> {
     try {
-      return await this.prisma.order.create({
-        data,
-      });
+      const itemPrice = await this.getItemPrice(data.itemId);
+      let totalAmount = Number(itemPrice * data.quantity);
+      data = {
+        ...data,
+        totalAmount,
+    
+      };
+      return await this.prisma.order.create({ data });
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(
         'Failed to create order',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -40,6 +61,7 @@ export class OrderService {
         data,
       });
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(
         'Failed to update order',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -53,6 +75,7 @@ export class OrderService {
         where: { id },
       });
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(
         'Failed to delete order',
         HttpStatus.INTERNAL_SERVER_ERROR,

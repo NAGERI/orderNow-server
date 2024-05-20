@@ -1,10 +1,11 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateItemDto, UpdateItemDto } from './dto/item.dto';
 
 @Injectable()
 export class ItemService {
   constructor(private readonly prisma: PrismaService) {}
+ private logger = new Logger('ItemService');
 
   async getItems(storeId: number) {
     try {
@@ -12,6 +13,7 @@ export class ItemService {
         where: { storeId },
       });
     } catch (error) {
+       this.logger.error(error);
       throw new HttpException(
         'Failed to fetch items',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -25,6 +27,7 @@ export class ItemService {
         data,
       });
     } catch (error) {
+       this.logger.error(error);
       throw new HttpException(
         'Failed to create item',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -39,6 +42,7 @@ export class ItemService {
         data,
       });
     } catch (error) {
+       this.logger.error(error);
       throw new HttpException(
         'Failed to update item',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -52,6 +56,7 @@ export class ItemService {
         where: { id },
       });
     } catch (error) {
+       this.logger.error(error);
       throw new HttpException(
         'Failed to delete item',
         HttpStatus.INTERNAL_SERVER_ERROR,
