@@ -7,6 +7,8 @@ import {
   Body,
   Param,
   UseGuards,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
@@ -23,6 +25,7 @@ export class ItemController {
   }
 
   @Post()
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async createItem(@Body() createItemDto: CreateItemDto) {
     return this.itemService.createItem(createItemDto);
   }

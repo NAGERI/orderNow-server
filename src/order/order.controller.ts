@@ -8,6 +8,8 @@ import {
   Param,
   UseGuards,
   Request,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
@@ -24,6 +26,7 @@ export class OrderController {
   }
 
   @Post()
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async createOrder(@Body() createOrderDto: CreateOrderDto, @Request() req) {
     return this.orderService.createOrder({
       ...createOrderDto,
