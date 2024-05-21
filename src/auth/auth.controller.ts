@@ -2,12 +2,13 @@ import {
   Body,
   ConflictException,
   Controller,
+  Get,
   HttpStatus,
+  Logger,
   Post,
   Res,
   UnauthorizedException,
-  UsePipes,
-  ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -15,13 +16,24 @@ import {
   AuthSignInCredentialsDto,
 } from './dto/authCredentials.dto';
 import { Response } from 'express';
+import { GetUser } from './get-user.decorator';
+import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+  private logger = new Logger('AuthService');
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard) // without this, the custom decorator cannot work
+  async getUserdetails(@GetUser() user: AuthCredentialsDto) {
+    this.logger.log(
+      `Fetching profile details for Logged In User:  ${user.username + ' role :  ' + user.role}`,
+    );
+    return this.authService.getUniqueUser(user);
+  }
 
   @Post('signup')
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async signUp(
     @Body() authCredentialsDto: AuthCredentialsDto,
     @Res() res: Response,
@@ -38,7 +50,6 @@ export class AuthController {
   }
 
   @Post('signin')
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async signin(
     @Body() authSignInCredentialsDto: AuthSignInCredentialsDto,
     @Res() res: Response,

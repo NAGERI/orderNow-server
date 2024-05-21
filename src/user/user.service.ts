@@ -62,7 +62,7 @@ export class UserService {
         },
       });
     } catch (error) {
-       this.logger.error(error);
+      this.logger.error(error);
       throw new HttpException(
         'Failed to Get users',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -80,7 +80,7 @@ export class UserService {
         },
       });
     } catch (error) {
-       this.logger.error(error);
+      this.logger.error(error);
       throw new HttpException(
         'Failed to create user',
         HttpStatus.INTERNAL_SERVER_ERROR,

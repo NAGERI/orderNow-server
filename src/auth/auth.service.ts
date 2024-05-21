@@ -1,4 +1,10 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { AuthCredentialsDto } from './dto/authCredentials.dto';
 import * as bcrypt from 'bcrypt';
@@ -12,6 +18,25 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   private logger = new Logger('AuthService');
+
+  async getUniqueUser(user: any): Promise<any> {
+    try {
+      return await this.prisma.user.findUnique({
+        where: { username: user.username },
+        select: {
+          username: true,
+          id: true,
+          role: true,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to fetch user details',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   async createUser(data: AuthCredentialsDto): Promise<any> {
     const { username, password } = data;
@@ -38,7 +63,11 @@ export class AuthService {
       this.logger.verbose('User created');
       return res;
     } catch (error) {
-      return Error(error);
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to create user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -51,15 +80,19 @@ export class AuthService {
 
       if (user && bcrypt.compare(password, user.password)) {
         // the payload type is an interface of { username: string }
-        const payload: IJwtPayload = { username };
+        const payload: IJwtPayload = { username, userId: user.id };
         const accessToken = await this.jwtService.sign(payload);
         return { accessToken };
       } else {
-        this.logger.log(user);
-        return Error('Please check your credentials');
+        this.logger.error(user);
+        throw new UnauthorizedException('Failed to Sign In user');
       }
     } catch (error) {
-      return error;
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to Sign In user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
