@@ -12,18 +12,30 @@ import {
 import { StoreService } from './store.service';
 import { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
 import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
+import { UserRole } from '@prisma/client';
+import { Roles } from 'src/utils/roles.decorator';
 
-@Controller('stores')
+@Controller('api/v1/stores')
 @UseGuards(JwtAuthGuard)
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
+  @Get(':ïd')
+  async getStoreById(@Param('id') id: number) {
+    return this.storeService.getStoreById(Number(id));
+  }
   @Get()
-  async getStores(@Request() req) {
+  async getStoresByAdminId(@Request() req) {
     return this.storeService.getStores(req.user.id);
   }
 
+  @Get('all')
+  async getAllStores() {
+    return this.storeService.getAllStores();
+  }
+
   @Post()
+  @Roles(UserRole.ADMIN)
   async createStore(@Body() createStoreDto: CreateStoreDto, @Request() req) {
     return this.storeService.createStore({
       adminId: req.user.id,
@@ -33,14 +45,14 @@ export class StoreController {
 
   @Put(':id')
   async updateStore(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateStoreDto: UpdateStoreDto,
   ) {
     return this.storeService.updateStore(Number(id), updateStoreDto);
   }
 
   @Delete(':id')
-  async deleteStore(@Param('id') id: string) {
+  async deleteStore(@Param('id') id: number) {
     return this.storeService.deleteStore(Number(id));
   }
 }

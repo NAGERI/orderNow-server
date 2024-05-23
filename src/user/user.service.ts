@@ -9,6 +9,13 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
   private logger = new Logger('UserService');
 
+  async findOneByEmail(username: string) {
+    this.logger.log('Finding One User by Email/Username');
+    return await this.prisma.user.findUnique({
+      where: { username },
+    });
+  }
+
   async deleteUser(id: number) {
     try {
       return await this.prisma.user.delete({

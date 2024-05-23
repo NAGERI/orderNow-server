@@ -13,9 +13,13 @@ import {
 import { ItemService } from './item.service';
 import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 import { CreateItemDto, UpdateItemDto } from './dto/item.dto';
+import { RolesGuard } from 'src/utils/role.guard';
+import { UserRole } from '@prisma/client';
 
-@Controller('items')
-@UseGuards(JwtAuthGuard)
+import { Roles } from 'src/utils/roles.decorator';
+
+@Controller('api/v1/items')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
@@ -25,6 +29,7 @@ export class ItemController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.USER)
   async createItem(@Body() createItemDto: CreateItemDto) {
     return this.itemService.createItem(createItemDto);
   }

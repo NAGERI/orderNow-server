@@ -13,7 +13,7 @@ import { OrderService } from './order.service';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
 import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 
-@Controller('orders')
+@Controller('api/v1/orders')
 @UseGuards(JwtAuthGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}

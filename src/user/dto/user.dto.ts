@@ -32,6 +32,8 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsEnum(UserRole, { message: 'Must have USER or ADMIN roles.' })
   role: UserRole;
 }
 

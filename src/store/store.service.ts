@@ -5,7 +5,7 @@ import { UpdateStoreDto } from './dto/store.dto';
 @Injectable()
 export class StoreService {
   constructor(private readonly prisma: PrismaService) {}
- private logger = new Logger('StoreService');
+  private logger = new Logger('StoreService');
 
   async getStores(adminId: number) {
     try {
@@ -13,7 +13,34 @@ export class StoreService {
         where: { adminId },
       });
     } catch (error) {
-       this.logger.error(error);
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to fetch stores',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getStoreById(id: number) {
+    try {
+      this.logger.log(`Getting Sore with ID ${id}`);
+      return await this.prisma.store.findUniqueOrThrow({
+        where: { id },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to fetch stores',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAllStores() {
+    try {
+      return await this.prisma.store.findMany();
+    } catch (error) {
+      this.logger.error(error);
       throw new HttpException(
         'Failed to fetch stores',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -31,7 +58,7 @@ export class StoreService {
         data,
       });
     } catch (error) {
-       this.logger.error(error);
+      this.logger.error(error);
       throw new HttpException(
         'Failed to create store',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -46,7 +73,7 @@ export class StoreService {
         data,
       });
     } catch (error) {
-       this.logger.error(error);
+      this.logger.error(error);
       throw new HttpException(
         'Failed to update store',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -60,7 +87,7 @@ export class StoreService {
         where: { id },
       });
     } catch (error) {
-       this.logger.error(error);
+      this.logger.error(error);
       throw new HttpException(
         'Failed to delete store',
         HttpStatus.INTERNAL_SERVER_ERROR,

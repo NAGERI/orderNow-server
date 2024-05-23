@@ -10,32 +10,30 @@ import { AuthCredentialsDto } from './dto/authCredentials.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { IJwtPayload } from './auth.interface';
+import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from 'src/user/dto/user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly usersService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
   private logger = new Logger('AuthService');
 
   async getUniqueUser(user: any): Promise<any> {
-    try {
-      return await this.prisma.user.findUnique({
-        where: { username: user.username },
-        select: {
-          username: true,
-          id: true,
-          role: true,
-        },
-      });
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        'Failed to fetch user details',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    const userByEmail = await this.usersService.findOneByEmail(user.username);
+    return userByEmail;
+  }
+
+  async validateUser(username: string, pass: string): Promise<any> {
+    const user = await this.usersService.findOneByEmail(username);
+    if (user && user.password === pass) {
+      const { password, ...result } = user;
+      return result;
     }
+    return null;
   }
 
   async createUser(data: AuthCredentialsDto): Promise<any> {
@@ -74,19 +72,18 @@ export class AuthService {
   async signInUser(data: AuthCredentialsDto): Promise<any> {
     const { username, password } = data;
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { username },
-      });
+      const user = await this.usersService.findOneByEmail(username);
 
       if (user && bcrypt.compare(password, user.password)) {
-        // the payload type is an interface of { username: string }
-        const payload: IJwtPayload = { username, userId: user.id };
-        const accessToken = await this.jwtService.sign(payload);
-        return { accessToken };
-      } else {
-        this.logger.error(user);
-        throw new UnauthorizedException('Failed to Sign In user');
+        const payload: IJwtPayload = {
+          username,
+          role: user.role,
+          sub: user.id,
+        };
+        return { accessToken: await this.jwtService.sign(payload) };
       }
+      this.logger.error(`Username/password is incorrect! ${user}`);
+      throw new UnauthorizedException('Username/Password is incorrect!');
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -94,5 +91,8 @@ export class AuthService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+  async register(createUserDto: CreateUserDto) {
+    return this.usersService.createUser(createUserDto);
   }
 }

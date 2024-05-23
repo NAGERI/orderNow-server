@@ -19,7 +19,7 @@ import { Response } from 'express';
 import { GetUser } from './get-user.decorator';
 import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 
-@Controller('auth')
+@Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   private logger = new Logger('AuthService');
