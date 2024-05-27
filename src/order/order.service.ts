@@ -14,10 +14,10 @@ export class OrderService {
   constructor(private readonly prisma: PrismaService) {}
   logger = new Logger('Order Service');
 
-  async getOrderStatusAndTotalQuantity(orderId: string) {
+  async getOrderStatusAndTotalQuantity(userId: string) {
     try {
-      const order = await this.prisma.order.findUnique({
-        where: { id: orderId },
+      const orders = await this.prisma.order.findMany({
+        where: { userId: userId },
         include: {
           orderItems: {
             include: {
@@ -27,18 +27,24 @@ export class OrderService {
         },
       });
 
-      if (!order) {
+      if (!orders) {
         throw new NotFoundException('Order not found');
       }
 
-      const totalQuantity = order.orderItems.reduce(
-        (total, orderItem) => total + orderItem.quantity,
-        0,
-      );
+      function calculateTotalSum(orders) {
+        return orders.reduce((totalSum, order) => {
+          const orderTotal = order.orderItems.reduce((sum, orderItems) => {
+            return sum + orderItems.item.price * orderItems.quantity;
+          }, 0);
+          return totalSum + orderTotal;
+        }, 0);
+      }
+
+      const totalSum = calculateTotalSum(orders);
 
       return {
-        status: totalQuantity > 0 ? 'PENDING' : 'COMPLETED',
-        totalQuantity,
+        status: totalSum > 0 ? 'PENDING' : 'COMPLETED',
+        totalSum,
       };
     } catch (error) {
       this.logger.error(error);
@@ -118,6 +124,27 @@ export class OrderService {
       this.logger.error(error);
       throw new HttpException(
         'Failed to get the order',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  async findByUser(userId: string) {
+    try {
+      return await this.prisma.order.findMany({
+        where: { userId },
+        include: {
+          Store: true,
+          orderItems: {
+            include: {
+              item: true,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to fetch logged In User order',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

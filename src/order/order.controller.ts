@@ -8,6 +8,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Logger,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
@@ -17,10 +18,11 @@ import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
+  logger = new Logger('Order Controller');
 
-  @Get(':id/status-and-quantity')
-  async getOrderStatusAndTotalQuantity(@Param('id') id: string) {
-    return this.orderService.getOrderStatusAndTotalQuantity(id);
+  @Get('status-and-quantity')
+  async getOrderStatusAndTotalQuantity(@Request() req) {
+    return this.orderService.getOrderStatusAndTotalQuantity(req.user.id);
   }
 
   // TODO provide: storeId and items[]
@@ -34,6 +36,11 @@ export class OrderController {
     return this.orderService.findAll();
   }
 
+  @Get('by-user')
+  async findByUser(@Request() req) {
+    this.logger.log(`Orders belonging to ${req.user.id}`);
+    return this.orderService.findByUser(req.user.id);
+  }
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
@@ -44,6 +51,7 @@ export class OrderController {
     @Param('id') id: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
+    this.logger.log(`Updating Order number: ${id}`);
     return this.orderService.update(id, updateOrderDto);
   }
 
