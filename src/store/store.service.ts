@@ -1,13 +1,19 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { UpdateStoreDto } from './dto/store.dto';
+import { CreateStoreDto, STORESTATUS, UpdateStoreDto } from './dto/store.dto';
 
 @Injectable()
 export class StoreService {
   constructor(private readonly prisma: PrismaService) {}
   private logger = new Logger('StoreService');
 
-  async getStores(adminId: number) {
+  async getStores(adminId: string) {
     try {
       return await this.prisma.store.findMany({
         where: { adminId },
@@ -21,11 +27,35 @@ export class StoreService {
     }
   }
 
-  async getStoreById(id: number) {
+  async findOne(id: string) {
     try {
       this.logger.log(`Getting Sore with ID ${id}`);
-      return await this.prisma.store.findUniqueOrThrow({
+      const store = await this.prisma.store.findUnique({
         where: { id },
+        include: {
+          items: true,
+        },
+      });
+      if (!store) {
+        throw new NotFoundException(`Store with ID ${id} not found`);
+      }
+
+      return store;
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to fetch store',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findAll() {
+    try {
+      return await this.prisma.store.findMany({
+        include: {
+          items: true,
+        },
       });
     } catch (error) {
       this.logger.error(error);
@@ -36,23 +66,7 @@ export class StoreService {
     }
   }
 
-  async getAllStores() {
-    try {
-      return await this.prisma.store.findMany();
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        'Failed to fetch stores',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async createStore(data: {
-    adminId: number;
-    name: string;
-    description?: string;
-  }): Promise<any> {
+  async create(data: any): Promise<any> {
     try {
       return await this.prisma.store.create({
         data,
@@ -66,7 +80,7 @@ export class StoreService {
     }
   }
 
-  async updateStore(id: number, data: UpdateStoreDto) {
+  async update(id: string, data: UpdateStoreDto) {
     try {
       return await this.prisma.store.update({
         where: { id },
@@ -81,7 +95,22 @@ export class StoreService {
     }
   }
 
-  async deleteStore(id: number) {
+  async deactivateStore(id: string) {
+    try {
+      return await this.prisma.store.update({
+        where: { id },
+        data: { status: STORESTATUS.INACTIVE },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to deactivate store',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async remove(id: string) {
     try {
       return await this.prisma.store.delete({
         where: { id },

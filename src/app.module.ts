@@ -4,9 +4,17 @@ import { UserModule } from './user/user.module';
 import { StoreModule } from './store/store.module';
 import { ItemModule } from './item/item.module';
 import { OrderModule } from './order/order.module';
+import { OrderItemModule } from './order-item/order-item.module';
 
 @Module({
-  imports: [AuthModule, UserModule, StoreModule, ItemModule, OrderModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    StoreModule,
+    ItemModule,
+    OrderModule,
+    OrderItemModule,
+  ],
   providers: [],
 })
 export class AppModule {}

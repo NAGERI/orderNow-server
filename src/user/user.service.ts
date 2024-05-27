@@ -16,7 +16,7 @@ export class UserService {
     });
   }
 
-  async deleteUser(id: number) {
+  async deleteUser(id) {
     try {
       return await this.prisma.user.delete({
         where: { id },
@@ -30,7 +30,7 @@ export class UserService {
     }
   }
 
-  async updateUser(id: number, data: UpdateUserDto) {
+  async updateUser(id: any, data: UpdateUserDto) {
     try {
       return await this.prisma.user.update({
         where: { id },

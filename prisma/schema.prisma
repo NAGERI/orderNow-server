@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
+  id       String   @id @default(cuid())
   username String   @unique
   password String
   role     UserRole @default(USER)
@@ -17,39 +17,54 @@ model User {
 }
 
 model Store {
-  id          Int         @id @unique @default(autoincrement())
-  adminId     Int?
+  id          String      @id @default(cuid())
+  adminId     String?
   name        String      @unique
   description String?
   status      StoreStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   items       Item[]
-  orders      Order[]
   User        User?       @relation(fields: [adminId], references: [id])
+  Order       Order[]
+
+  @@index([adminId])
 }
 
 model Item {
-  id          Int        @id @unique @default(autoincrement())
-  storeId     Int
+  id          String      @id @default(cuid())
   name        String
-  price       Float
   description String?
-  itemStatus  ItemStatus @default(InSTOCK)
-  store       Store      @relation(fields: [storeId], references: [id])
-  order       Order[]
+  price       Int
+  storeId     String
+  store       Store       @relation(fields: [storeId], references: [id])
+  orderItems  OrderItem[]
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
-  userId      Int
-  storeId     Int
-  itemId      Int
-  quantity    Int
-  totalAmount Int
-  status      OrderStatus @default(Pending)
-  createdAt   DateTime    @default(now())
-  item        Item        @relation(fields: [itemId], references: [id])
-  store       Store       @relation(fields: [storeId], references: [id])
-  user        User        @relation(fields: [userId], references: [id])
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  userId     String
+  status     OrderStatus @default(PENDING)
+  orderItems OrderItem[]
+  user       User        @relation(fields: [userId], references: [id])
+  Store      Store?      @relation(fields: [storeId], references: [id])
+  storeId    String?
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  quantity Int
+  orderId  String
+  itemId   String
+  order    Order  @relation(fields: [orderId], references: [id])
+  item     Item   @relation(fields: [itemId], references: [id])
+
+  @@index([orderId])
+  @@index([itemId])
 }
 
 enum UserRole {
@@ -63,12 +78,7 @@ enum StoreStatus {
 }
 
 enum OrderStatus {
-  Pending
-  Completed
-  Cancelled
-}
-
-enum ItemStatus {
-  InSTOCK
-  OutOfSTOCK
+  PENDING
+  COMPLETED
+  CANCELLED
 }

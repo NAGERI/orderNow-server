@@ -1,50 +1,78 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
-import { Order, Prisma } from '@prisma/client';
+import { OrderStatus } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
   constructor(private readonly prisma: PrismaService) {}
   logger = new Logger('Order Service');
-  async getOrders(userId: number) {
+
+  async getOrderStatusAndTotalQuantity(orderId: string) {
     try {
-      return await this.prisma.order.findMany({
-        where: { userId },
-        include: { item: true, store: true },
+      const order = await this.prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          orderItems: {
+            include: {
+              item: true,
+            },
+          },
+        },
       });
+
+      if (!order) {
+        throw new NotFoundException('Order not found');
+      }
+
+      const totalQuantity = order.orderItems.reduce(
+        (total, orderItem) => total + orderItem.quantity,
+        0,
+      );
+
+      return {
+        status: totalQuantity > 0 ? 'PENDING' : 'COMPLETED',
+        totalQuantity,
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
-        'Failed to fetch orders',
+        'Failed to get order status',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
-  async getItemPrice(id: Number): Promise<number> {
-    const item = await this.prisma.item.findUnique({
-      where: { id: Number(id) },
-      select: { price: true },
-    });
-    this.logger.log(item);
-    if (!item) {
-      throw new Error(`Item with id ${id} not found`);
-    }
-
-    return item.price;
-  }
-  // TODO the connect is not necessary. DEBUG
-  async createOrder(data: any): Promise<Order> {
+  async create(createOrderDto: CreateOrderDto) {
     try {
-      const itemPrice = await this.getItemPrice(data.itemId);
-      let totalAmount = Number(itemPrice * data.quantity);
-      data = {
-        ...data,
-        totalAmount,
-    
-      };
-      return await this.prisma.order.create({ data });
+      const { userId, storeId, items } = createOrderDto;
+
+      return this.prisma.$transaction(async (prisma) => {
+        const order = await prisma.order.create({
+          data: {
+            userId,
+            storeId,
+            status: OrderStatus.PENDING,
+          },
+        });
+
+        const orderItems = items.map((item) => ({
+          orderId: order.id,
+          itemId: item.itemId,
+          quantity: item.quantity,
+        }));
+
+        await prisma.orderItem.createMany({
+          data: orderItems,
+        });
+
+        return order;
+      });
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -54,11 +82,52 @@ export class OrderService {
     }
   }
 
-  async updateOrder(id: number, data: UpdateOrderDto) {
+  async findAll() {
+    try {
+      return await this.prisma.order.findMany({
+        include: {
+          orderItems: {
+            include: {
+              item: true,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to find all order',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      return await this.prisma.order.findUnique({
+        where: { id },
+        include: {
+          orderItems: {
+            include: {
+              item: true,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to get the order',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async update(id: string, updateOrderDto: UpdateOrderDto) {
     try {
       return await this.prisma.order.update({
         where: { id },
-        data,
+        data: updateOrderDto,
       });
     } catch (error) {
       this.logger.error(error);
@@ -69,7 +138,7 @@ export class OrderService {
     }
   }
 
-  async deleteOrder(id: number) {
+  async remove(id: string) {
     try {
       return await this.prisma.order.delete({
         where: { id },

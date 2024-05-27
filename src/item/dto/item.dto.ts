@@ -1,55 +1,21 @@
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export enum ITEMSTATUS {
-  InSTOCK = 'InSTOCK',
-  OutOfSTOCK = 'OutOfSTOCK',
-}
-// item.dto.ts
+import { PartialType } from '@nestjs/mapped-types';
+
 export class CreateItemDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  description: string;
+
   @IsNumber()
-  @IsNotEmpty()
   price: number;
 
   @IsString()
   @IsNotEmpty()
-  @IsOptional()
-  description?: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  storeId: number;
+  storeId: string;
 }
 
-export class UpdateItemDto {
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  name: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @IsOptional()
-  price: number;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  description?: string;
-
-  @IsEnum(ITEMSTATUS, {
-    message: 'Must have InSTOCK or OutOfSTOCK status.',
-  })
-  @IsNotEmpty()
-  @IsOptional()
-  status: ITEMSTATUS;
-}
+export class UpdateItemDto extends PartialType(CreateItemDto) {}

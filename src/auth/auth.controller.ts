@@ -38,11 +38,7 @@ export class AuthController {
     @Body() authCredentialsDto: AuthCredentialsDto,
     @Res() res: Response,
   ) {
-    const { username, password } = authCredentialsDto;
-    const result = await this.authService.createUser({
-      username,
-      password,
-    });
+    const result = await this.authService.createUser(authCredentialsDto);
     if (result instanceof Error) {
       throw new ConflictException('User already exists!');
     }

@@ -37,7 +37,7 @@ export class AuthService {
   }
 
   async createUser(data: AuthCredentialsDto): Promise<any> {
-    const { username, password } = data;
+    const { username, password, role } = data;
     try {
       this.logger.verbose('User creation');
 
@@ -50,13 +50,13 @@ export class AuthService {
 
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(password, salt);
-      const data = {
-        username,
-        password: hashedPassword,
-      };
 
       const res = await this.prisma.user.create({
-        data,
+        data: {
+          username,
+          password: hashedPassword,
+          role,
+        },
       });
       this.logger.verbose('User created');
       return res;
@@ -78,7 +78,7 @@ export class AuthService {
         const payload: IJwtPayload = {
           username,
           role: user.role,
-          sub: user.id,
+          id: user.id,
         };
         return { accessToken: await this.jwtService.sign(payload) };
       }

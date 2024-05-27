@@ -1,35 +1,38 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateOrderItemsDto } from 'src/order-item/dto/order-item.dto';
+import { Type } from 'class-transformer';
 
-export enum ORDERSTATUS {
-  Pending = 'Pending',
-  Completed = 'Completed',
-  Cancelled = 'Cancelled',
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
 }
-
 export class CreateOrderDto {
-  @IsNumber()
-  @IsNotEmpty()
+  @IsString()
   @IsOptional()
-  itemId: number;
+  userId: string;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  storeId: number;
+  storeId: string;
 
-  @IsNumber()
-  @IsNotEmpty()
-  quantity: number;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrderItemsDto)
+  items: CreateOrderItemsDto[];
 
-  @IsNumber()
-  @IsNotEmpty()
-  @IsOptional()
-  totalAmount?: number;
-}
-
-export class UpdateOrderDto {
-  @IsEnum(ORDERSTATUS, {
-    message: 'Must have Pending, Completed or Cancelled status.',
+  @IsEnum(OrderStatus, {
+    message: 'Must have COMPLETED, PENDING or CANCELLED status.',
   })
-  @IsNotEmpty()
-  status: ORDERSTATUS;
+  status: OrderStatus;
 }
+
+export class UpdateOrderDto extends PartialType(CreateOrderDto) {}

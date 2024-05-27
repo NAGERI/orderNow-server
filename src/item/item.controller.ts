@@ -7,8 +7,6 @@ import {
   Body,
   Param,
   UseGuards,
-  ValidationPipe,
-  UsePipes,
 } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
@@ -23,9 +21,17 @@ import { Roles } from 'src/utils/roles.decorator';
 export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
-  @Get(':storeId')
-  async getItems(@Param('storeId') storeId: string) {
-    return this.itemService.getItems(Number(storeId));
+  @Get('/by-store/:storeId')
+  async getItemsByStore(@Param('storeId') storeId: string) {
+    return this.itemService.getItems(String(storeId));
+  }
+  @Get(':itemId')
+  async getOneItem(@Param('itemId') itemId: string) {
+    return this.itemService.findOne(String(itemId));
+  }
+  @Get()
+  async getAllItems() {
+    return this.itemService.findAll();
   }
 
   @Post()
@@ -35,16 +41,15 @@ export class ItemController {
   }
 
   @Put(':id')
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async updateItem(
     @Param('id') id: string,
     @Body() updateItemDto: UpdateItemDto,
   ) {
-    return this.itemService.updateItem(Number(id), updateItemDto);
+    return this.itemService.updateItem(String(id), updateItemDto);
   }
 
   @Delete(':id')
   async deleteItem(@Param('id') id: string) {
-    return this.itemService.deleteItem(Number(id));
+    return this.itemService.deleteItem(String(id));
   }
 }

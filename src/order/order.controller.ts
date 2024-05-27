@@ -18,29 +18,37 @@ import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @Get()
-  async getOrders(@Request() req) {
-    return this.orderService.getOrders(req.user.id);
+  @Get(':id/status-and-quantity')
+  async getOrderStatusAndTotalQuantity(@Param('id') id: string) {
+    return this.orderService.getOrderStatusAndTotalQuantity(id);
   }
 
+  // TODO provide: storeId and items[]
   @Post()
-  async createOrder(@Body() createOrderDto: CreateOrderDto, @Request() req) {
-    return this.orderService.createOrder({
-      ...createOrderDto,
-      userId: req.user.id,
-    });
+  async create(@Body() createOrderDto: CreateOrderDto, @Request() req) {
+    return this.orderService.create({ ...createOrderDto, userId: req.user.id });
+  }
+
+  @Get()
+  async findAll() {
+    return this.orderService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.orderService.findOne(id);
   }
 
   @Put(':id')
-  async updateOrder(
+  async update(
     @Param('id') id: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
-    return this.orderService.updateOrder(Number(id), updateOrderDto);
+    return this.orderService.update(id, updateOrderDto);
   }
 
   @Delete(':id')
-  async deleteOrder(@Param('id') id: string) {
-    return this.orderService.deleteOrder(Number(id));
+  async remove(@Param('id') id: string) {
+    return this.orderService.remove(id);
   }
 }

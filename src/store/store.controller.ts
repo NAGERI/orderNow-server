@@ -8,51 +8,59 @@ import {
   Param,
   UseGuards,
   Request,
+  Patch,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
 import { JwtAuthGuard } from 'src/utils/jwt-auth.guard';
 import { UserRole } from '@prisma/client';
 import { Roles } from 'src/utils/roles.decorator';
+import { RolesGuard } from 'src/utils/role.guard';
 
 @Controller('api/v1/stores')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
-  @Get(':ïd')
-  async getStoreById(@Param('id') id: number) {
-    return this.storeService.getStoreById(Number(id));
-  }
-  @Get()
-  async getStoresByAdminId(@Request() req) {
-    return this.storeService.getStores(req.user.id);
-  }
-
-  @Get('all')
-  async getAllStores() {
-    return this.storeService.getAllStores();
-  }
-
   @Post()
   @Roles(UserRole.ADMIN)
-  async createStore(@Body() createStoreDto: CreateStoreDto, @Request() req) {
-    return this.storeService.createStore({
-      adminId: req.user.id,
+  async create(@Body() createStoreDto: CreateStoreDto, @Request() req) {
+    return this.storeService.create({
       ...createStoreDto,
+      adminId: req.user.id,
     });
   }
 
-  @Put(':id')
-  async updateStore(
-    @Param('id') id: number,
+  @Get()
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  async findAll() {
+    return this.storeService.findAll();
+  }
+
+  @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  async findOne(@Param('id') id: string) {
+    return this.storeService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN)
+  async update(
+    @Param('id') id: string,
     @Body() updateStoreDto: UpdateStoreDto,
   ) {
-    return this.storeService.updateStore(Number(id), updateStoreDto);
+    return this.storeService.update(id, updateStoreDto);
   }
 
   @Delete(':id')
-  async deleteStore(@Param('id') id: number) {
-    return this.storeService.deleteStore(Number(id));
+  @Roles(UserRole.ADMIN)
+  async remove(@Param('id') id: string) {
+    return this.storeService.remove(id);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN)
+  async deactivateStore(@Param('id') id: String) {
+    return this.storeService.deactivateStore(String(id));
   }
 }
