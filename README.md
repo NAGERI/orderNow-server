@@ -26,13 +26,23 @@
 
 ## Description
 
-A Multi-tenant applicaiton for restaurants.
+A multi-restaurant REST API applicaiton , where users can access the registered restaturants available and order for foods offered on their items..
 
 ## Installation
 
 ```bash
 $ npm install
 ```
+
+### Install the PostgreSQL database
+
+- Run Prisma Migrations. This will install tables.
+
+```bash
+ $ npm run prismaM
+```
+
+````
 
 ## Running the app
 
@@ -45,7 +55,7 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
-```
+````
 
 ## Test
 
@@ -53,13 +63,10 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+### Developed by @NAGERI

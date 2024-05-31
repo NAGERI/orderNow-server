@@ -110,6 +110,7 @@ export class OrderService {
 
   async findOne(id: string) {
     try {
+      this.logger.log(`Fetcing Order for ID ${id}`);
       return await this.prisma.order.findUnique({
         where: { id },
         include: {
