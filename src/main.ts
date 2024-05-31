@@ -18,6 +18,6 @@ async function bootstrap() {
   );
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`OrderNow listening on port ${port}`);
+  console.log(`Order Now Server listening on port ${port}`);
 }
 bootstrap();
