@@ -36,10 +36,10 @@ export class OrderController {
     return this.orderService.findAll();
   }
 
-  @Get('by-user')
+  @Get('pending-by-user')
   async findByUser(@Request() req) {
     this.logger.log(`Orders belonging to ${req.user.id}`);
-    return this.orderService.findByUser(req.user.id);
+    return this.orderService.findPendingByUser(req.user.id);
   }
   @Get(':id')
   async findOne(@Param('id') id: string) {

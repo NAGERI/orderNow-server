@@ -57,7 +57,7 @@ export class OrderService {
   async create(createOrderDto: CreateOrderDto) {
     try {
       const { userId, storeId, items } = createOrderDto;
-
+      this.logger.verbose(`Got items by: ${userId} from:  ${storeId}`);
       return this.prisma.$transaction(async (prisma) => {
         const order = await prisma.order.create({
           data: {
@@ -128,7 +128,29 @@ export class OrderService {
       );
     }
   }
-  async findByUser(userId: string) {
+  async findPendingByUser(userId: string) {
+    try {
+      return await this.prisma.order.findMany({
+        where: { userId, status: OrderStatus.PENDING },
+        include: {
+          Store: true,
+          orderItems: {
+            include: {
+              item: true,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Failed to fetch logged In User order',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findAllByUser(userId: string) {
     try {
       return await this.prisma.order.findMany({
         where: { userId },

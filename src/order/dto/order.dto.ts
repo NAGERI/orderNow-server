@@ -32,6 +32,7 @@ export class CreateOrderDto {
   @IsEnum(OrderStatus, {
     message: 'Must have COMPLETED, PENDING or CANCELLED status.',
   })
+  @IsOptional()
   status: OrderStatus;
 }
 

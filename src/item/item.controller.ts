@@ -35,7 +35,7 @@ export class ItemController {
   }
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.USER)
+  // @Roles(UserRole.ADMIN)
   async createItem(@Body() createItemDto: CreateItemDto) {
     return this.itemService.createItem(createItemDto);
   }
