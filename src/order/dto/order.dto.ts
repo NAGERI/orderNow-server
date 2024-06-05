@@ -36,4 +36,8 @@ export class CreateOrderDto {
   status: OrderStatus;
 }
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+export class UpdateOrderDto extends PartialType(CreateOrderDto) {
+  @IsString()
+  @IsOptional()
+  id: string;
+}

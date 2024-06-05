@@ -76,7 +76,12 @@ export class ItemService {
     try {
       return await this.prisma.item.update({
         where: { id },
-        data,
+        data: {
+          name: data.name,
+          description: data.description,
+          price: Number(data.price),
+          storeId: data.storeId,
+        },
       });
     } catch (error) {
       this.logger.error(error);

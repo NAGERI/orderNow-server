@@ -56,11 +56,15 @@ export class OrderItemService {
     }
   }
 
-  async update(id: string, updateOrderItemDto: UpdateOrderItemDto) {
+  async update(id: string, data: UpdateOrderItemDto) {
     try {
       return this.prisma.orderItem.update({
         where: { id },
-        data: updateOrderItemDto,
+        data: {
+          itemId: data.itemId,
+          orderId: data.orderId,
+          quantity: data.quantity,
+        },
       });
     } catch (error) {
       this.logger.error(error);

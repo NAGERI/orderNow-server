@@ -38,14 +38,14 @@ export class OrderController {
 
   @Get('pending-by-user')
   async findByUser(@Request() req) {
-    this.logger.log(`Orders belonging to ${req.user.id}`);
     return this.orderService.findPendingByUser(req.user.id);
   }
   @Get(':id')
   async findOne(@Param('id') id: string) {
+    this.logger.log(`Found Order ID: ${id}`);
     return this.orderService.findOne(id);
   }
-
+  //TODO Make sure, you are passing correct BODY
   @Put(':id')
   async update(
     @Param('id') id: string,

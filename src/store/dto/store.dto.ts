@@ -22,4 +22,8 @@ export class CreateStoreDto {
   status?: STORESTATUS;
 }
 
-export class UpdateStoreDto extends PartialType(CreateStoreDto) {}
+export class UpdateStoreDto extends PartialType(CreateStoreDto) {
+  @IsString()
+  @IsOptional()
+  id: string;
+}
